@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>マダミス説明画像作成アプリ</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+    }
+
+    #controls {
+      margin: 20px;
+    }
+
+    textarea, button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+      height: 60px;
+      resize: vertical;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border: 2px solid white;
+    }
+
+    textarea {
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    button {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid white;
+      cursor: pointer;
+    }
+
+    #field1 { background-image: url('input_bg1.png'); }
+    #field2 { background-image: url('input_bg2.png'); }
+    #field3 { background-image: url('input_bg3.png'); }
+    #field4 { background-image: url('input_bg4.png'); }
+
+    #output {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      margin: 20px auto;
+      background-image: url('background.png');
+      background-size: cover;
+      border: 3px solid white;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 10px;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 35px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 15px;
+      background-color: white;
+      color: black;
+      white-space: pre-line;
+      overflow: hidden;
+    }
+
+    .box img.silhouette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      opacity: 0.3;
+      z-index: 0;
+    }
+
+    .box div, .box span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .red {
+      color: darkred;
+      font-weight: bold;
+    }
+
+    .template1 .box {
+      border: 4px solid white;
+      font-family: "serif";
+    }
+
+    .template2 .box {
+      border: 4px dashed red;
+      font-weight: bold;
+    }
+
+    .template3 .box {
+      border: 4px double #00f;
+      border-radius: 30px;
+      font-family: "sans-serif";
+    }
+  </style>
+</head>
+<body>
+  <h1>マダミス説明画像作成アプリ</h1>
+
+  <div id="controls">
+    <textarea id="field1" placeholder="プレイ人数（例：２人用）"></textarea><br>
+    <textarea id="field2" placeholder="プレイ時間（例：２時間）"></textarea><br>
+    <textarea id="field3" placeholder="プレイ環境（例：オンライン）"></textarea><br>
+    <textarea id="field4" placeholder="特徴（例：ちょいグロ）"></textarea><br>
+
+    <button onclick="generate()">🎨 画像を生成</button>
+    <button onclick="setTemplate('template1')">テンプレート1</button>
+    <button onclick="setTemplate('template2')">テンプレート2</button>
+    <button onclick="setTemplate('template3')">テンプレート3</button>
+  </div>
+
+  <div id="output" class="template1">
+    <div class="grid">
+      <div class="box" id="box1"></div>
+      <div class="box" id="box2"></div>
+      <div class="box" id="box3"></div>
+      <div class="box" id="box4"></div>
+    </div>
+  </div>
+
+  <script>
+    function generate() {
+      const values = [
+        document.getElementById("field1").value,
+        document.getElementById("field2").value,
+        document.getElementById("field3").value,
+        document.getElementById("field4").value
+      ];
+
+      const silhouettes = [
+        "box_icon1.png",
+        "box_icon2.png",
+        "box_icon3.png",
+        "box_icon4.png"
+      ];
+
+      for (let i = 0; i < 4; i++) {
+        const text = values[i] || "未入力";
+        const box = document.getElementById("box" + (i + 1));
+        const safeText = text
+          .replace(/(死ぬ|死亡)/g, '<span class="red">$1</span>')
+          .replace(/\n/g, "<br>");
+
+        box.innerHTML = `
+          <img class="silhouette" src="${silhouettes[i]}" alt="シルエット画像">
+          <div>${safeText}</div>
+        `;
+      }
+    }
+
+    function setTemplate(templateClass) {
+      const output = document.getElementById("output");
+      output.className = templateClass;
+    }
+
+    function downloadImage() {
+      const target = document.getElementById("output");
+      html2canvas(target).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "mystery_image.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>
